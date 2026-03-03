@@ -5,7 +5,7 @@ Aplicación de crochet con IA — gestiona tu stash, genera patrones personaliza
 ## Stack
 
 - **Next.js 14** (App Router)
-- **Supabase** — base de datos, autenticación OAuth
+- **Supabase** — base de datos, autenticación (Google OAuth + email/password)
 - **Claude API** (Anthropic) — generación de patrones y análisis de stash
 
 ---
@@ -38,18 +38,18 @@ ANTHROPIC_API_KEY=sk-ant-api03-...
 2. Ve a **SQL Editor** y ejecuta el contenido de `sql/001_initial_schema.sql`
 3. Copia tu **Project URL** y **anon public key** desde Settings → API
 
-### 4. OAuth (Google y GitHub)
+### 4. Autenticación
 
-#### Google
+#### Google OAuth
 1. Ve a [console.cloud.google.com](https://console.cloud.google.com)
 2. Crea proyecto → APIs & Services → Credentials → OAuth 2.0 Client ID
 3. Authorized redirect URI: `https://<tu-proyecto>.supabase.co/auth/v1/callback`
 4. En Supabase → Authentication → Providers → Google: pega Client ID y Secret
 
-#### GitHub
-1. Ve a GitHub → Settings → Developer Settings → OAuth Apps → New OAuth App
-2. Authorization callback URL: `https://<tu-proyecto>.supabase.co/auth/v1/callback`
-3. En Supabase → Authentication → Providers → GitHub: pega Client ID y Secret
+#### Email / Password
+1. En Supabase → Authentication → Providers → Email: verifica que esté habilitado (viene activado por defecto).
+2. Opcional: configura la plantilla del correo de confirmación en Supabase → Authentication → Email Templates.
+3. Los usuarios se registran desde la propia landing page (`/`) con correo y contraseña. Recibirán un correo de confirmación antes de poder iniciar sesión.
 
 ### 5. Correr en desarrollo
 

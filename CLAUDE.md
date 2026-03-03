@@ -13,7 +13,7 @@
 | Framework | Next.js 14 (App Router) |
 | UI | React 18, inline CSS-in-JS, CSS variables |
 | Database | Supabase (PostgreSQL with RLS) |
-| Auth | Supabase OAuth2 (Google + GitHub) |
+| Auth | Supabase OAuth2 (Google) + email/password |
 | AI | Anthropic Claude API (`claude-sonnet-4-20250514`) |
 | PWA | Service Worker (`public/sw.js`) + `manifest.json` |
 | Package manager | npm |
@@ -188,11 +188,23 @@ import supabase from '../../lib/supabase'
 
 ## Authentication Flow
 
-1. User clicks OAuth button on `/` (landing page).
-2. Supabase redirects to Google/GitHub and back.
-3. Session is stored by Supabase; components read it via `supabase.auth.getSession()`.
-4. All protected components render an `AuthScreen` if no session is found.
-5. Sign-out via `supabase.auth.signOut()` in `Nav.jsx`.
+The landing page (`app/page.jsx`) offers two authentication methods via a tab switcher:
+
+### Google OAuth
+1. User clicks "Continuar con Google".
+2. Supabase redirects to Google and back to `/stash`.
+3. Session is stored by Supabase automatically.
+
+### Email / Password
+- **Login** (`supabase.auth.signInWithPassword`): user enters email + password.
+- **Register** (`supabase.auth.signUp`): user enters email + password + confirmation. Supabase sends a confirmation email; the user must click the link before logging in.
+- Client-side error messages are translated to Spanish via a small lookup map in `app/page.jsx`.
+
+### Common to both methods
+- Session is read via `supabase.auth.getSession()` + `onAuthStateChange()`.
+- All protected components render an `AuthScreen` if no session is found.
+- Sign-out via `supabase.auth.signOut()` in `Nav.jsx`.
+- GitHub OAuth has been removed.
 
 ---
 
@@ -221,7 +233,7 @@ vercel deploy
 
 | Path | Component | Description |
 |------|-----------|-------------|
-| `/` | `app/page.jsx` | Landing / OAuth login |
+| `/` | `app/page.jsx` | Landing / login (Google OAuth + email/password) + registro |
 | `/stash` | `StashToProject` | Yarn inventory + AI project suggestions |
 | `/patrones` | `PatternGenerator` | AI pattern generation with streaming |
 | `/perfiles` | `SizeProfiles` | Body measurement profile manager |
