@@ -161,18 +161,22 @@ export default function PatternGenerator() {
     setError("");
 
     try {
+      const garmentLabel = GARMENT_TYPES.find(g => g.id === form.garment)?.label || form.garment;
       const response = await fetch("/api/generate-pattern", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "anthropic-version": "2023-06-01",
-          // En producción usa un proxy /api/generate-pattern para ocultar la key
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 4000,
-          stream: true,
-          messages: [{ role: "user", content: buildPrompt(form) }],
+          garment: garmentLabel,
+          yarnWeight: form.yarnWeight,
+          yarnFiber: form.yarnFiber,
+          hookSize: form.hookSize,
+          skillLevel: form.skillLevel,
+          style: form.style,
+          colorCount: form.colorCount,
+          measurements: form.measurements,
+          extraNotes: form.extraNotes,
         }),
       });
 
