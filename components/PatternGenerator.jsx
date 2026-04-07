@@ -122,11 +122,16 @@ function parsePattern(text) {
   return sections;
 }
 
+const DIAGRAM_SYMBOLS_RE = /[○×T⊕]/;
+const DIAGRAM_LEGEND_RE = /^Referencia:/i;
+
 function renderContent(content) {
   if (!content) return null;
   return content.split("\n").map((line, i) => {
     if (line.startsWith("#### ")) return <h4 key={i} className="subsection-title">{line.replace("#### ", "")}</h4>;
     if (line.startsWith("- ")) return <li key={i} className="pattern-li">{line.replace("- ", "")}</li>;
+    if (DIAGRAM_LEGEND_RE.test(line.trim())) return <span key={i} className="pattern-diagram-legend">{line}</span>;
+    if (DIAGRAM_SYMBOLS_RE.test(line)) return <pre key={i} className="pattern-diagram-row">{line}</pre>;
     if (line.match(/^(Vuelta|Fila|Ronda|Round)\s+\d+/i)) return <p key={i} className="pattern-row"><span className="row-label">{line.split(":")[0]}</span>{line.includes(":") ? ":" + line.split(":").slice(1).join(":") : ""}</p>;
     if (line.trim() === "---") return <hr key={i} className="pattern-divider" />;
     if (line.trim() === "") return <div key={i} className="pattern-spacer" />;
@@ -161,18 +166,22 @@ export default function PatternGenerator() {
     setError("");
 
     try {
+      const garmentLabel = GARMENT_TYPES.find(g => g.id === form.garment)?.label || form.garment;
       const response = await fetch("/api/generate-pattern", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "anthropic-version": "2023-06-01",
-          // En producción usa un proxy /api/generate-pattern para ocultar la key
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 4000,
-          stream: true,
-          messages: [{ role: "user", content: buildPrompt(form) }],
+          garment: garmentLabel,
+          yarnWeight: form.yarnWeight,
+          yarnFiber: form.yarnFiber,
+          hookSize: form.hookSize,
+          skillLevel: form.skillLevel,
+          style: form.style,
+          colorCount: form.colorCount,
+          measurements: form.measurements,
+          extraNotes: form.extraNotes,
         }),
       });
 
@@ -657,6 +666,30 @@ export default function PatternGenerator() {
           left: 0;
           color: var(--rust);
           font-weight: 700;
+        }
+
+        .pattern-diagram-row {
+          font-family: 'Courier New', Courier, monospace;
+          font-size: 15px;
+          letter-spacing: 3px;
+          color: var(--rust);
+          background: var(--cream);
+          border-left: 3px solid var(--rust);
+          padding: 4px 12px;
+          margin: 2px 0;
+          white-space: pre;
+          border-radius: 0 4px 4px 0;
+        }
+        .pattern-diagram-legend {
+          font-family: 'Courier New', Courier, monospace;
+          font-size: 12px;
+          letter-spacing: 1px;
+          color: var(--muted);
+          margin-top: 8px;
+          padding: 6px 12px;
+          background: var(--cream);
+          border-radius: 4px;
+          display: inline-block;
         }
 
         .pattern-divider {
